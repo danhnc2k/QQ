@@ -401,7 +401,7 @@ QInt decToBin(string src)
 	string binStr = "";
 	do
 	{
-		int lastDigit = src[src.length() - 1] - '0';
+		int lastDigit = src[src.length() - 1] - '0';sd
 		binStr += ((lastDigit % 2 == 0) ? '0' : '1');
 		src = divByTwo(src);
 	} while (src != "0");
