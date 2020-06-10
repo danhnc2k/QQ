@@ -34,7 +34,7 @@ QInt QInt::Zero()
 	return staticZero;
 }
 
-bool QInt::getBit(int pos) const
+bool QInt::getBit(int pos) const//
 {
 	int bytePos = 2 - 1 - pos / 64;
 	int bitPos = pos % 64;
@@ -90,7 +90,7 @@ QInt QInt::operator*(const QInt& B) const
 		Q.setBit(2 * 64 - 1, A.getBit(0));
 		A = A >> 1;
 	}
-	
+
 	return Q;
 }
 
@@ -106,55 +106,7 @@ QInt QInt::operator/(const QInt& B) const
 	return div;
 }
 
-bool QInt::operator>(const QInt& B) const
-{
-	bool isANegative = this->isNegative();
-	bool isBNegative = B.isNegative();
 
-	if (isANegative + isBNegative == 1)//A va B trai dau
-	{
-		if (isANegative)
-			return false;
-		else
-			return true;
-	}
-
-	for (int i = 0; i < 2; i++)
-	{
-		//A>B
-		if (this->abc[i] > B.abc[i])
-			return true;
-
-		//A<B
-		if (this->abc[i] < B.abc[i])
-			return false;
-	}
-	return false;
-}
-
-bool QInt::operator<(const QInt& B) const
-{
-	bool isANegative = this->isNegative();
-	bool isBNegative = B.isNegative();
-
-	if (isANegative + isBNegative == 1) //A va B trai dau nhau
-	{
-		if (isANegative)
-			return true;
-		else return false;
-	}
-
-	for (int i = 0; i < 2; i++)
-	{
-		//A > B
-		if (this->abc[i] > B.abc[i])
-			return false;
-		//A < B
-		if (this->abc[i] < B.abc[i])
-			return true;
-	}
-	return false;
-}
 
 bool QInt::operator==(const QInt& B) const
 {
@@ -171,15 +123,6 @@ bool QInt::operator!=(const QInt& B) const
 	return !(*this == B);
 }
 
-bool QInt::operator>=(const QInt& B) const
-{
-	return !(*this < B);
-}
-
-bool QInt::operator<=(const QInt& B) const
-{
-	return !(*this > B);
-}
 
 QInt& QInt::operator=(const QInt& B)
 {
@@ -230,16 +173,17 @@ QInt QInt::operator~() const
 	return res;
 }
 
-QInt QInt::operator>>(int nums) const
+QInt QInt::operator>>(int nums) const//need to repair
 {
 	QInt res = *this;
 	bool msb = this->getBit(2 * 64 - 1);
 	while (nums > 0)
 	{
 		res.abc[1] = res.abc[1] >> 1;
-		res.setBit(63, 0);
-		if (res.abc[0] & 1)		
-			res.abc[1] = (((long long)1 << 63) | res.abc[1]);
+		res.setBit(63, res.getBit(64));
+		/*res.setBit(63, 0);
+		if (res.abc[0] & 1)
+			res.abc[1] = (((long long)1 << 63) | res.abc[1]);*/
 		res.abc[0] = res.abc[0] >> 1;
 		res.setBit(2 * 64 - 1, msb);
 		nums--;
@@ -247,20 +191,14 @@ QInt QInt::operator>>(int nums) const
 	return res;
 }
 
-QInt QInt::operator<<(int nums) const
+QInt QInt::operator<<(int nums) const//need to repair
 {
 	QInt res = *this;
 	while (nums > 0)
 	{
-		for (int i = 0; i < 2 - 1; i++)
-		{
-			res.abc[i] = res.abc[i] << 1;
-			if ((res.abc[i + 1] >> 63) & 1)
-			{
-				res.abc[i] = (1 | res.abc[i]);
-			}
-		}
-		res.abc[2 - 1] = res.abc[2 - 1] << 1;
+		res.abc[0] = res.abc[0] << 1;
+		res.setBit(64, res.getBit(63));
+		res.abc[1] = res.abc[1] << 1;
 		nums--;
 	}
 	return res;
@@ -303,47 +241,27 @@ string mulByTwo(string src, int additive)
 	return res;
 }
 
-QInt QInt::rol(int nums) const
+QInt QInt::rol() const//need to repair
 {
 	QInt res = *this;
-	while (nums > 0)
-	{
-		bool additive = ((res.abc[0] >> 63) & 1);
-		for (int i = 0; i < 2 - 1; i++)
-		{
-			res.abc[i] = res.abc[i] << 1;
-			if ((res.abc[i + 1] >> 63) & 1)
-			{
-				res.abc[i] = (1 | res.abc[i]);
-			}
-		}
-		res.abc[2 - 1] = res.abc[2 - 1] << 1;
-		if (additive)
-			res.abc[2 - 1] = (1 | res.abc[2 - 1]);
-		nums--;
-	}
+	bool additive = ((res.abc[0] >> 63) & 1);
+	res.abc[0] = res.abc[0] << 1;
+	res.setBit(64, res.getBit(63));
+	res.abc[1] = res.abc[1] << 1;
+	if (additive)
+		res.setBit(0, additive);
 	return res;
 }
 
-QInt QInt::ror(int nums) const
+QInt QInt::ror() const//need to repair
 {
 	QInt res = *this;
-	while (nums > 0)
-	{
-		bool additive = (res.abc[2 - 1] & 1);
-		for (int i = 2 - 1; i >= 1; i--)
-		{
-			res.abc[i] = res.abc[i] >> 1;
-			if (res.abc[i - 1] & 1)
-			{
-				res.abc[i] = (((long long)1 << 63) | res.abc[i]);
-			}
-		}
-		res.abc[0] = res.abc[0] >> 1;
-		if (additive)
-			res.abc[0] = (((long long)1 << 63) | res.abc[0]);
-		nums--;
-	}
+	bool additive = (res.abc[1] & 1);
+	res.abc[1] = res.abc[1] >> 1;
+	res.setBit(63, res.getBit(64));
+	res.abc[0] = res.abc[0] >> 1;
+	if (additive)
+		res.setBit(2 * 64 - 1, additive);
 	return res;
 }
 
@@ -457,22 +375,41 @@ string binToDec(const QInt& src)
 	return res;
 }
 
+//string binToHex(const QInt& src)
+//{
+//	string res = "";
+//	stringstream ss;
+//	for (int i = 0; i < 2; i++)
+//	{
+//		ss << hex << src.abc[i];
+//		res += ss.str();
+//		ss.str("");
+//	}
+//	while (res[0] == '0' && res.length() > 1)
+//		res.erase(0, 1);
+//	res = Upstring(res);
+//	return res;
+//}
 string binToHex(const QInt& src)
 {
 	string res = "";
-	stringstream ss;
-	for (int i = 0; i < 2; i++)
+	string stringSrc = src.toBinStr();
+	int num = stringSrc.length() % 4;
+	while (num != 0 && num < 4)
 	{
-		ss << hex << src.abc[i];
-		res += ss.str();
-		ss.str("");
+		stringSrc = '0' + stringSrc;
+		num++;
+	}
+	int L = stringSrc.length();
+	for (int i = 0; i < L; i += 4)
+	{
+		int pos = bitset<4>(stringSrc.substr(i, 4)).to_ulong();
+		res += HEX_CHAR[pos];
 	}
 	while (res[0] == '0' && res.length() > 1)
 		res.erase(0, 1);
-	res = Upstring(res);
 	return res;
 }
-
 QInt plusQInt(const QInt& A, const QInt& B)
 {
 	QInt res;
