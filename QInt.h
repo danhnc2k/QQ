@@ -29,12 +29,9 @@ public:
 	QInt operator* (const QInt& B) const;
 	QInt operator/ (const QInt& B) const;
 
-	bool operator> (const QInt& B) const;
-	bool operator< (const QInt& B) const;
+
 	bool operator== (const QInt& B) const;
 	bool operator!= (const QInt& B) const;
-	bool operator>= (const QInt& B) const;
-	bool operator<= (const QInt& B) const;
 	QInt& operator= (const QInt& B);
 
 	QInt operator& (const QInt& B) const;
@@ -44,8 +41,8 @@ public:
 
 	QInt operator>> (int nums) const;
 	QInt operator<< (int nums) const;
-	QInt rol(int nums) const;
-	QInt ror(int nums) const;
+	QInt rol() const;
+	QInt ror() const;
 
 
 	void divide(const QInt& divisor, QInt& div, QInt& mod) const;
